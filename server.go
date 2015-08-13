@@ -46,8 +46,9 @@ type HttpServerConfig struct {
 
 type FoolServer struct {
 	*http.Server
-	listener    net.Listener
-	application *Application
+	listener net.Listener
+	App      *Application
+	config   *HttpServerConfig
 }
 
 var restart string
@@ -96,7 +97,7 @@ func NewServer(server_config *HttpServerConfig) (*FoolServer, error) {
 		return nil, err
 	}
 
-	srv := &FoolServer{listener: l, application: app}
+	srv := &FoolServer{listener: l, App: app, config: server_config}
 	srv.Server = &http.Server{}
 	srv.Server.Addr = server_config.Addr
 	srv.Server.ReadTimeout = time.Duration(server_config.ReadTimeout) * time.Second
@@ -107,17 +108,15 @@ func NewServer(server_config *HttpServerConfig) (*FoolServer, error) {
 	return srv, nil
 }
 
-func (srv *FoolServer) RegController(controller_map map[string]FGController) *FoolServer {
-	srv.application.RegController(controller_map)
-	return srv
-}
-
 func (srv *FoolServer) RegRewrite(rewrite map[string]string) *FoolServer {
 	regRewrite(rewrite)
 	return srv
 }
 
 func (srv *FoolServer) Run() {
+	//解析模板
+	CompileTpl(srv.config.ViewPath)
+
 	//信号处理函数
 	go srv.signalHandle()
 

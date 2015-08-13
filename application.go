@@ -57,13 +57,15 @@ func NewApplication(http_server_config *HttpServerConfig) (*Application, error) 
 	application_instance.dispatcher = NewDispatcher(http_server_config)
 	//初始化router
 	NewRouter()
-	//解析模板
-	CompileTpl(http_server_config.ViewPath)
 
 	return application_instance, nil
 }
 
 /*}}}*/
+
+func (this *Application) AddViewFunc(key string, func_name interface{}) {
+	AddViewFunc(key, func_name)
+}
 
 /*{{{ func (this *Application) RegController(controller_name string, controller interface{})
  */

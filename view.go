@@ -17,10 +17,18 @@ var (
 	ViewExt        string = ".html"
 	ViewTemplates  map[string]*template.Template
 	template_files map[string]string
+	view_func      map[string]interface{}
 )
 
 type View struct {
 	data map[interface{}]interface{}
+}
+
+func init() {
+	view_func = make(map[string]interface{})
+	view_func["date"] = Date
+	view_func["strtotime"] = StrToTime
+	view_func["time"] = Time
 }
 
 func NewView() *View {
@@ -45,7 +53,7 @@ func (this *View) Assign(key interface{}, value interface{}) {
 func (this *View) Render(view_name string) ([]byte, error) {
 	view_name = strings.ToLower(view_name)
 	if RunMod == "dev" {
-		t := template.New(view_name).Delims("{{", "}}")
+		t := template.New(view_name).Delims("{{", "}}").Funcs(view_func)
 		t, err := parseTemplate(t, ViewRoot+"/"+view_name+ViewExt)
 		if err != nil || t == nil {
 			return []byte(""), err
@@ -63,26 +71,14 @@ func (this *View) Render(view_name string) ([]byte, error) {
 		}
 		html_content, _ := ioutil.ReadAll(html_content_bytes)
 		return html_content, nil
-
-		/*
-			if IsGzip == false {
-				return string(html_content), nil
-			}
-
-			var b bytes.Buffer
-			w := gzip.NewWriter(&b)
-			defer w.Close()
-
-			w.Write(html_content)
-			w.Flush()
-
-			htmls, _ := ioutil.ReadAll(&b)
-			return string(htmls), nil
-		*/
 	}
 }
 
 /*}}}*/
+
+func AddViewFunc(key string, func_name interface{}) {
+	view_func[key] = func_name
+}
 
 /*{{{ func CompileTpl(view_root string) error
  */
@@ -111,7 +107,7 @@ func CompileTpl(view_root string) error {
 			fmt.Printf("parse template %q err : %q", file, err)
 			continue
 		}
-		t := template.New(name).Delims("{{", "}}")
+		t := template.New(name).Delims("{{", "}}").Funcs(view_func)
 
 		t, err := parseTemplate(t, file)
 		if err != nil || t == nil {
