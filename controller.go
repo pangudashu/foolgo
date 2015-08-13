@@ -3,6 +3,7 @@ package foolgo
 import (
 	//"fmt"
 	"mime/multipart"
+	"net/http"
 )
 
 type Controller struct {
@@ -91,8 +92,16 @@ func (this *Controller) IP() string {
 	return this.request.IP()
 }
 
+func (this *Controller) Scheme() string {
+	return this.request.Scheme()
+}
+
 func (this *Controller) Header(key string) string {
 	return this.request.Header(key)
+}
+
+func (this *Controller) SetHeader(key, value string) {
+	this.response.Header(key, value)
 }
 
 func (this *Controller) SetCookie(name string, value string, others ...interface{}) {
@@ -124,6 +133,10 @@ func (this *Controller) GET() map[string]string {
 //获取所有post提交变量
 func (this *Controller) POST() map[string]interface{} {
 	return this.request.ParamPost()
+}
+
+func (this *Controller) Location(url string) {
+	http.Redirect(this.response.Writer, this.request.request, url, 301)
 }
 
 //获取所有上传文件

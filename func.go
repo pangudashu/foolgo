@@ -1,7 +1,12 @@
 package foolgo
 
 import (
-	//"fmt"
+	"crypto/md5"
+	"crypto/sha1"
+	"fmt"
+	"io"
+	"net"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -60,4 +65,43 @@ func Date(format string, t time.Time) string {
 
 func Time() int64 {
 	return time.Now().Unix()
+}
+
+func Ip2long(ip_str string) int64 {
+	bits := strings.Split(ip_str, ".")
+
+	b0, _ := strconv.Atoi(bits[0])
+	b1, _ := strconv.Atoi(bits[1])
+	b2, _ := strconv.Atoi(bits[2])
+	b3, _ := strconv.Atoi(bits[3])
+
+	var sum int64
+
+	sum += int64(b0) << 24
+	sum += int64(b1) << 16
+	sum += int64(b2) << 8
+	sum += int64(b3)
+	return sum
+}
+
+func Long2ip(ip_int int64) string {
+	var bytes [4]byte
+	bytes[0] = byte(ip_int & 0xFF)
+	bytes[1] = byte((ip_int >> 8) & 0xFF)
+	bytes[2] = byte((ip_int >> 16) & 0xFF)
+	bytes[3] = byte((ip_int >> 24) & 0xFF)
+
+	return net.IPv4(bytes[3], bytes[2], bytes[1], bytes[0]).String()
+}
+
+func Md5(str string) string {
+	t := md5.New()
+	io.WriteString(t, str)
+	return fmt.Sprintf("%x", t.Sum(nil))
+}
+
+func Sha1(str string) string {
+	h := sha1.New()
+	io.WriteString(h, str)
+	return fmt.Sprintf("%x", h.Sum(nil))
 }

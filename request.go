@@ -75,6 +75,16 @@ func (this *Request) IP() string {
 	return "127.0.0.1"
 }
 
+func (this *Request) Scheme() string {
+	if this.request.URL.Scheme != "" {
+		return this.request.URL.Scheme
+	}
+	if this.request.TLS == nil {
+		return "http"
+	}
+	return "https"
+}
+
 func (this *Request) Proxy() []string {
 	if ips := this.Header("X-Forwarded-For"); ips != "" {
 		return strings.Split(ips, ",")
