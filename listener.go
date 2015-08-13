@@ -1,8 +1,6 @@
 package foolgo
 
 import (
-	//"fmt"
-	"log"
 	"net"
 	"os"
 	"syscall"
@@ -22,11 +20,9 @@ func NewListener(addr string) (*FoolListener, error) {
 			return nil, err
 		}
 
-		log.Print("main: Listening to existing file descriptor 3.")
 		f := os.NewFile(3, "")
 		l, err = net.FileListener(f)
 	} else {
-		log.Printf("[listener.go]Listening on a new file descriptor...[%q]", addr)
 		l, err = net.Listen("tcp", addr)
 	}
 	listener := &FoolListener{Listener: l, stopped: false}

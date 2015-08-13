@@ -42,13 +42,19 @@ type HttpServerConfig struct {
 	WriteTimeout  int
 	MaxHeaderByte int
 	HttpErrorHtml map[int]string
+	//https
+	SslOn      bool
+	SslCert    string
+	SslCertKey string
+	Pid        string
 }
 
 type FoolServer struct {
 	*http.Server
-	listener net.Listener
-	App      *Application
-	config   *HttpServerConfig
+	listener    net.Listener
+	listenerPtr *FoolListener
+	App         *Application
+	config      *HttpServerConfig
 }
 
 var restart string
@@ -86,10 +92,26 @@ func NewServer(server_config *HttpServerConfig) (*FoolServer, error) {
 	if server_config.MaxHeaderByte <= 0 {
 		server_config.MaxHeaderByte = 1 << 20
 	}
+	if server_config.Pid == "" {
+		return nil, errors.New("foolgo.HttpServerConfig.Pid can't be empty")
+	}
+
+	srv := &FoolServer{config: server_config}
 
 	l, err := NewListener(server_config.Addr)
 	if err != nil {
 		return nil, err
+	}
+
+	if server_config.SslOn == true && server_config.SslCert != "" && server_config.SslCertKey != "" {
+		srv.listenerPtr = l
+		srv.listener, err = NewTlsListener(srv.listenerPtr, server_config.SslCert, server_config.SslCertKey)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		srv.listenerPtr = l
+		srv.listener = l
 	}
 	//new Application
 	app, err := NewApplication(server_config)
@@ -97,7 +119,7 @@ func NewServer(server_config *HttpServerConfig) (*FoolServer, error) {
 		return nil, err
 	}
 
-	srv := &FoolServer{listener: l, App: app, config: server_config}
+	srv.App = app
 	srv.Server = &http.Server{}
 	srv.Server.Addr = server_config.Addr
 	srv.Server.ReadTimeout = time.Duration(server_config.ReadTimeout) * time.Second
@@ -114,6 +136,7 @@ func (srv *FoolServer) RegRewrite(rewrite map[string]string) *FoolServer {
 }
 
 func (srv *FoolServer) Run() {
+
 	//解析模板
 	CompileTpl(srv.config.ViewPath)
 
@@ -122,7 +145,7 @@ func (srv *FoolServer) Run() {
 
 	serverStat = STATE_RUNNING
 
-	//杀掉父进程
+	//kill父进程
 	if isChild == true {
 		parent := syscall.Getppid()
 
@@ -130,8 +153,9 @@ func (srv *FoolServer) Run() {
 			return
 		}
 		log.Printf("main: Killing parent pid: %v", parent)
-		syscall.Kill(parent, syscall.SIGTERM)
+		syscall.Kill(parent, syscall.SIGQUIT)
 	}
+	srv.createPid(syscall.Getpid())
 
 	//listen loop
 	srv.Serve(srv.listener)
@@ -153,7 +177,6 @@ func (srv *FoolServer) signalHandle() {
 
 		switch sig {
 		case syscall.SIGHUP:
-			log.Print("signal hup")
 			srv.forkServer()
 		case syscall.SIGINT:
 			srv.shutDown()
@@ -162,12 +185,10 @@ func (srv *FoolServer) signalHandle() {
 		case syscall.SIGTERM:
 			srv.shutDown()
 		default:
-			log.Print("unknown")
 		}
 	}
 }
 
-//关闭server
 func (srv *FoolServer) shutDown() {
 	if serverStat != STATE_RUNNING {
 		return
@@ -193,13 +214,25 @@ func (srv *FoolServer) serverTimeout() {
 	if serverStat != STATE_SHUTTING_DOWN {
 		return
 	}
-	time.Sleep(time.Second * 20)
-	log.Println("[STOP - Hammer Time] Forcefully shutting down parent")
+	time.Sleep(time.Second * 60)
 	for {
 		if serverStat == STATE_TERMINATE {
 			break
 		}
 		connWg.Done()
+	}
+	log.Println("[STOP - Hammer Time] Forcefully shutting down parent")
+}
+
+func (srv *FoolServer) createPid(pid int) {
+	fd, _ := os.OpenFile(srv.config.Pid, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
+	defer fd.Close()
+	fd.WriteString(fmt.Sprintf("%d", pid))
+
+	_, err := os.Stat(srv.config.Pid)
+	if err != nil && os.IsNotExist(err) {
+		fmt.Printf("Can't create %q\n", srv.config.Pid)
+		os.Exit(1)
 	}
 }
 
@@ -213,8 +246,8 @@ func (srv *FoolServer) forkServer() {
 	}
 	isForking = true
 
-	file := srv.listener.(*FoolListener).File()
-	fmt.Println(file)
+	var file *os.File
+	file = srv.listenerPtr.File()
 
 	files := make([]*os.File, 1)
 	files[0] = file

@@ -87,6 +87,10 @@ func (this *Controller) Url() string {
 	return this.request.Url()
 }
 
+func (this *Controller) IP() string {
+	return this.request.IP()
+}
+
 func (this *Controller) Header(key string) string {
 	return this.request.Header(key)
 }

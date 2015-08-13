@@ -111,7 +111,6 @@ func (f *memFile) Readdir(count int) ([]os.FileInfo, error) {
 	return infos, nil
 }
 
-// Read bytes from the compressed file bytes.
 func (f *memFile) Read(p []byte) (n int, err error) {
 	if len(f.fi.content)-int(f.offset) >= len(p) {
 		n = len(p)
@@ -127,7 +126,6 @@ func (f *memFile) Read(p []byte) (n int, err error) {
 var errWhence = errors.New("Seek: invalid whence")
 var errOffset = errors.New("Seek: invalid offset")
 
-// Read bytes from the compressed file bytes by seeker.
 func (f *memFile) Seek(offset int64, whence int) (ret int64, err error) {
 	switch whence {
 	default:

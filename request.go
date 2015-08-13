@@ -3,10 +3,9 @@ package foolgo
 import (
 	"errors"
 	//"fmt"
+	"io"
 	"mime/multipart"
 	"net/http"
-	//"reflect"
-	"io"
 	"os"
 	"strings"
 )
@@ -59,6 +58,28 @@ func (this *Request) Uri() string {
 
 func (this *Request) Url() string {
 	return this.request.URL.Path
+}
+
+func (this *Request) IP() string {
+	ips := this.Proxy()
+	if len(ips) > 0 && ips[0] != "" {
+		rip := strings.Split(ips[0], ":")
+		return rip[0]
+	}
+	ip := strings.Split(this.request.RemoteAddr, ":")
+	if len(ip) > 0 {
+		if ip[0] != "[" {
+			return ip[0]
+		}
+	}
+	return "127.0.0.1"
+}
+
+func (this *Request) Proxy() []string {
+	if ips := this.Header("X-Forwarded-For"); ips != "" {
+		return strings.Split(ips, ",")
+	}
+	return []string{}
 }
 
 func (this *Request) Header(key string) string {
