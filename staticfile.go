@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"compress/gzip"
 	"errors"
-	//"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"

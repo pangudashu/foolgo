@@ -83,6 +83,9 @@ func AddViewFunc(key string, func_name interface{}) {
 /*{{{ func CompileTpl(view_root string) error
  */
 func CompileTpl(view_root string) error {
+	if view_root == "" {
+		return nil
+	}
 	ViewRoot = view_root
 	template_files = make(map[string]string)
 
