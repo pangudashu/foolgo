@@ -1,14 +1,16 @@
 package controllers
 
 import (
-	"fmt"
-	"github.com/pangudashu/FoolGo"
+	"github.com/pangudashu/foolgo"
+	"time"
 )
 
 type DemoController struct {
-	FoolGo.Controller
+	foolgo.Controller
 }
 
 func (demo *DemoController) IndexAction() {
-	fmt.Println("ddd")
+	demo.Assign("time", time.Now())
+	demo.Assign("title", "welcome to foolgo~")
+	demo.Display()
 }

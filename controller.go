@@ -57,6 +57,9 @@ func (this *Controller) Display(view_path ...string) {
 	if err == nil {
 		this.response.Header("Content-Type", "text/html; charset=utf-8")
 		this.response.Body(bytes)
+	} else {
+		this.response.Header("Content-Type", "text/html; charset=utf-8")
+		this.response.Body([]byte(err.Error()))
 	}
 }
 

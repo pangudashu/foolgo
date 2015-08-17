@@ -51,6 +51,9 @@ func (this *View) Assign(key interface{}, value interface{}) {
 /*{{{ func (this *View) Render(view_name string) (string, error)
  */
 func (this *View) Render(view_name string) ([]byte, error) {
+	if ViewRoot == "" {
+		return []byte(""), errors.New("\"ViewPath\" not set in struct foolgo.HttpServerConfig")
+	}
 	view_name = strings.ToLower(view_name)
 	if RunMod == "dev" {
 		t := template.New(view_name).Delims("{{", "}}").Funcs(view_func)
@@ -62,7 +65,7 @@ func (this *View) Render(view_name string) ([]byte, error) {
 	}
 
 	if tpl, ok := ViewTemplates[view_name]; ok == false {
-		return []byte(""), errors.New("template " + view_name + " not complile")
+		return []byte(""), errors.New("template " + ViewRoot + "/" + view_name + ViewExt + " not found or compile failed")
 	} else {
 		html_content_bytes := bytes.NewBufferString("")
 		err := tpl.ExecuteTemplate(html_content_bytes, view_name, this.data)
