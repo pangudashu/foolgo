@@ -4,6 +4,7 @@ import (
 	"net"
 	"os"
 	"syscall"
+	"time"
 )
 
 type FoolListener struct {
@@ -31,13 +32,15 @@ func NewListener(addr string) (*FoolListener, error) {
 }
 
 func (this *FoolListener) Accept() (c net.Conn, err error) {
-	c, err = this.Listener.Accept()
+	tc, err := this.Listener.(*net.TCPListener).AcceptTCP() //.Accept()
 	if err != nil {
-		return c, err
+		return nil, err
 	}
+	tc.SetKeepAlive(true)
+	tc.SetKeepAlivePeriod(3 * time.Minute)
 
 	c = FoolConn{
-		Conn: c,
+		Conn: tc,
 	}
 	connWg.Add(1)
 	return c, nil
