@@ -4,9 +4,7 @@ import (
 	"mime"
 )
 
-/*{{{ var mime_map = map[string]string
- */
-var mime_map = map[string]string{
+var mime_map = map[string]string{ /*{{{*/
 	".3dm":         "x-world/x-3dmf",
 	".3dmf":        "x-world/x-3dmf",
 	".7z":          "application/x-7z-compressed",
@@ -544,17 +542,12 @@ var mime_map = map[string]string{
 	".xpi":         "application/x-xpinstall",
 	".oex":         "application/x-opera-extension",
 	".mustache":    "text/html",
-}
+} /*}}}*/
 
-/*}}}*/
-
-/*{{{ func initMime() error
- */
-func initMime() error {
+// Init mime type
+func initMime() error { /*{{{*/
 	for k, v := range mime_map {
 		mime.AddExtensionType(k, v)
 	}
 	return nil
-}
-
-/*}}}*/
+} /*}}}*/
