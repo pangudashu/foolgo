@@ -35,22 +35,16 @@ func NewView() *View {
 	return &View{}
 }
 
-/*{{{ func (this *View) Assign(key interface{}, value interface{})
- */
-func (this *View) Assign(key interface{}, value interface{}) {
+func (this *View) Assign(key interface{}, value interface{}) { /*{{{*/
 	if this.data == nil {
 		this.data = make(map[interface{}]interface{})
 		this.data[key] = value
 	} else {
 		this.data[key] = value
 	}
-}
+} /*}}}*/
 
-/*}}}*/
-
-/*{{{ func (this *View) Render(view_name string) (string, error)
- */
-func (this *View) Render(view_name string) ([]byte, error) {
+func (this *View) Render(view_name string) ([]byte, error) { /*{{{*/
 	if ViewRoot == "" {
 		return []byte(""), errors.New("\"ViewPath\" not set in struct foolgo.HttpServerConfig")
 	}
@@ -75,17 +69,13 @@ func (this *View) Render(view_name string) ([]byte, error) {
 		html_content, _ := ioutil.ReadAll(html_content_bytes)
 		return html_content, nil
 	}
-}
-
-/*}}}*/
+} /*}}}*/
 
 func AddViewFunc(key string, func_name interface{}) {
 	view_func[key] = func_name
 }
 
-/*{{{ func CompileTpl(view_root string) error
- */
-func CompileTpl(view_root string) error {
+func CompileTpl(view_root string) error { /*{{{*/
 	if view_root == "" {
 		return nil
 	}
@@ -123,13 +113,9 @@ func CompileTpl(view_root string) error {
 	}
 
 	return nil
-}
+} /*}}}*/
 
-/*}}}*/
-
-/*{{{ func parseTemplate(template *template.Template, file string) (t *template.Template, err error)
- */
-func parseTemplate(template *template.Template, file string) (t *template.Template, err error) {
+func parseTemplate(template *template.Template, file string) (t *template.Template, err error) { /*{{{*/
 	data, _ := ioutil.ReadFile(file)
 
 	t, err = template.Parse(string(data))
@@ -159,6 +145,4 @@ func parseTemplate(template *template.Template, file string) (t *template.Templa
 		}
 	}
 	return t, nil
-}
-
-/*}}}*/
+} /*}}}*/

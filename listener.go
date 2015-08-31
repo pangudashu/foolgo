@@ -31,8 +31,9 @@ func NewListener(addr string) (*FoolListener, error) {
 	return listener, err
 }
 
-func (this *FoolListener) Accept() (c net.Conn, err error) {
-	tc, err := this.Listener.(*net.TCPListener).AcceptTCP() //.Accept()
+// Accept new connect
+func (this *FoolListener) Accept() (c net.Conn, err error) { /*{{{*/
+	tc, err := this.Listener.(*net.TCPListener).AcceptTCP()
 	if err != nil {
 		return nil, err
 	}
@@ -44,7 +45,7 @@ func (this *FoolListener) Accept() (c net.Conn, err error) {
 	}
 	connWg.Add(1)
 	return c, nil
-}
+} /*}}}*/
 
 func (this *FoolListener) Close() error {
 	if this.stopped {
@@ -55,8 +56,8 @@ func (this *FoolListener) Close() error {
 	return this.Listener.Close()
 }
 
+// Dup new listener fd which FD_CLOEXEC flag not seted
 func (this *FoolListener) File() *os.File {
-	// returns a dup(2) - FD_CLOEXEC flag *not* set
 	l := this.Listener.(*net.TCPListener)
 	file, _ := l.File()
 	return file
