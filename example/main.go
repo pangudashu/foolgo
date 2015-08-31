@@ -17,6 +17,7 @@ func main() {
 		Addr:       ":8090",                                                                         //监听地址:端口
 		AccessLog:  "/home/qinpeng/log/foolgo/access.log",                                           //
 		ErrorLog:   "/home/qinpeng/log/foolgo/error.log",                                            //
+		RunLog:     "/home/qinpeng/log/foolgo/run.log",                                              //
 		IsGzip:     true,                                                                            //是否开启gzip
 		ZipMinSize: 500,                                                                             //gzip压缩起始大小
 		Pid:        "/tmp/example.pid",                                                              //进程号保存地址

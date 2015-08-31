@@ -25,10 +25,8 @@ type Application struct {
 	dispatcher    *Dispatcher
 }
 
-/*{{{ func NewApplication(http_server_config *HttpServerConfig) (*Application,error)
- *获取Application对象
- */
-func NewApplication(http_server_config *HttpServerConfig) (*Application, error) {
+//create Application object
+func NewApplication(http_server_config *HttpServerConfig) (*Application, error) { /*{{{*/
 	if application_instance != nil {
 		return application_instance, nil
 	}
@@ -50,42 +48,35 @@ func NewApplication(http_server_config *HttpServerConfig) (*Application, error) 
 	IsGzip = http_server_config.IsGzip
 	ZipMinSize = http_server_config.ZipMinSize
 
-	//初始化mime
+	//init mime
 	initMime()
-	//初始化Register
+	//init Register
 	application_instance.register = NewRegister()
-	//初始化dispatcher
+	//init dispatcher
 	application_instance.dispatcher = NewDispatcher(http_server_config)
-	//初始化router
+	//init router
 	NewRouter()
 
 	return application_instance, nil
-}
-
-/*}}}*/
+} /*}}}*/
 
 func (this *Application) AddViewFunc(key string, func_name interface{}) {
 	AddViewFunc(key, func_name)
 }
 
-/*{{{ func (this *Application) RegController(controller_name string, controller interface{})
- */
-func (this *Application) RegController(register_controller_map map[string]FGController) {
+//register controller
+func (this *Application) RegController(register_controller_map map[string]FGController) { /*{{{*/
 	for controller_name, controller := range register_controller_map {
 		err := this.register.SetController(controller_name, controller)
 		if err != nil {
-			fmt.Println("[RegController]:", err)
+			logger.RunLog(fmt.Sprintf("[Error] RegController error :%v", err))
 			os.Exit(0)
 		}
 	}
-}
+} /*}}}*/
 
-/*}}}*/
-
-/*{{{ func (this *Application) ServeHTTP(w http.ResponseWriter, r *http.Request)
- * Http请求入口
- */
-func (this *Application) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+//http request handler
+func (this *Application) ServeHTTP(w http.ResponseWriter, r *http.Request) { /*{{{*/
 	start_time := time.Now()
 
 	if r.URL.Path != "/" {
@@ -109,13 +100,11 @@ func (this *Application) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		this.Isset(r.Header.Get("User-Agent")),
 	)
 	logger.AccessLog(access_log)
-}
+} /*}}}*/
 
-/*}}}*/
-
-func (this *Application) Isset(params string) string {
+func (this *Application) Isset(params string) string { /*{{{*/
 	if params == "" {
 		return "-"
 	}
 	return params
-}
+} /*}}}*/

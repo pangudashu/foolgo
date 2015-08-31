@@ -15,9 +15,7 @@ type Dispatcher struct {
 	after_dispatch  string
 }
 
-/*{{{ func NewDispatcher() *Dispatcher
- */
-func NewDispatcher(http_server_config ...*HttpServerConfig) *Dispatcher {
+func NewDispatcher(http_server_config ...*HttpServerConfig) *Dispatcher { /*{{{*/
 	if dispatcher_instance != nil {
 		return dispatcher_instance
 	}
@@ -29,13 +27,9 @@ func NewDispatcher(http_server_config ...*HttpServerConfig) *Dispatcher {
 	}
 
 	return dispatcher_instance
-}
+} /*}}}*/
 
-/*}}}*/
-
-/*{{{ func (this *Dispatcher) Dispatch_handler(w http.ResponseWriter, r *http.Request)
- */
-func (this *Dispatcher) Dispatch_handler(w http.ResponseWriter, r *http.Request) {
+func (this *Dispatcher) Dispatch_handler(w http.ResponseWriter, r *http.Request) { /*{{{*/
 	//init request
 	request := NewRequest(r)
 	router := GetRouter()
@@ -121,6 +115,4 @@ func (this *Dispatcher) Dispatch_handler(w http.ResponseWriter, r *http.Request)
 	}
 
 	response.Header("Connection", request.Header("Connection"))
-}
-
-/*}}}*/
+} /*}}}*/

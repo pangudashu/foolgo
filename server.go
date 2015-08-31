@@ -4,7 +4,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"log"
 	"net"
 	"net/http"
 	"os"
@@ -40,7 +39,7 @@ type HttpServerConfig struct {
 	Addr          string
 	AccessLog     string
 	ErrorLog      string
-	StandOutPut   string
+	RunLog        string
 	IsGzip        bool
 	ZipMinSize    int
 	ReadTimeout   int
@@ -79,7 +78,8 @@ func init() {
 	}
 }
 
-func NewServer(server_config *HttpServerConfig) (*FoolServer, error) {
+// Init a http(s) server
+func NewServer(server_config *HttpServerConfig) (*FoolServer, error) { /*{{{*/
 	runLock.Lock()
 	defer runLock.Unlock()
 
@@ -131,15 +131,15 @@ func NewServer(server_config *HttpServerConfig) (*FoolServer, error) {
 	srv.Server.Handler = app
 
 	return srv, nil
-}
+} /*}}}*/
 
-func (srv *FoolServer) RegRewrite(rewrite map[string]string) *FoolServer {
+func (srv *FoolServer) RegRewrite(rewrite map[string]string) *FoolServer { /*{{{*/
 	regRewrite(rewrite)
 	return srv
-}
+} /*}}}*/
 
-func (srv *FoolServer) Run() {
-	logger = NewLog(srv.config.AccessLog, srv.config.ErrorLog, srv.config.StandOutPut)
+func (srv *FoolServer) Run() { /*{{{*/
+	logger = NewLog(srv.config.AccessLog, srv.config.ErrorLog, srv.config.RunLog)
 	//解析模板
 	CompileTpl(srv.config.ViewPath)
 	//信号处理函数
@@ -154,23 +154,24 @@ func (srv *FoolServer) Run() {
 		if _, err := os.FindProcess(parent); err != nil {
 			return
 		}
-		log.Printf("main: Killing parent pid: %v", parent)
+		logger.RunLog(fmt.Sprintf("[Notice] Killing parent pid: %v", parent))
 		syscall.Kill(parent, syscall.SIGQUIT)
 	}
 	srv.createPid(syscall.Getpid())
 
+	logger.RunLog("[Notice] Server start.")
 	//listen loop
 	srv.Serve(srv.listener)
 
-	log.Println(syscall.Getpid(), "[server.go]Waiting for connections to finish...")
+	logger.RunLog("[Notice] Waiting for connections to finish...")
 	connWg.Wait()
 	serverStat = STATE_TERMINATE
-	log.Println("[server.go]server shuttdown!!!!")
+	logger.RunLog("[Notice] Server shuttdown.")
 	return
-}
+} /*}}}*/
 
-//信号处理
-func (srv *FoolServer) signalHandle() {
+// Init signal handler
+func (srv *FoolServer) signalHandle() { /*{{{*/
 	ch := make(chan os.Signal)
 	signal.Notify(ch, syscall.SIGINT, syscall.SIGHUP, syscall.SIGTERM, syscall.SIGQUIT)
 
@@ -189,9 +190,9 @@ func (srv *FoolServer) signalHandle() {
 		default:
 		}
 	}
-}
+} /*}}}*/
 
-func (srv *FoolServer) shutDown() {
+func (srv *FoolServer) shutDown() { /*{{{*/
 	if serverStat != STATE_RUNNING {
 		return
 	}
@@ -201,16 +202,18 @@ func (srv *FoolServer) shutDown() {
 
 	err := srv.listener.Close()
 	if err != nil {
-		log.Println(syscall.Getpid(), "Listener.Close() error:", err)
+		logger.RunLog(fmt.Sprintf("[Error] Listener.Close() error:%s", err.Error()))
 	} else {
-		log.Println(syscall.Getpid(), "[server.go#shutDown]", srv.listener.Addr(), "Listener closed.")
+		logger.RunLog("[Notice] Listener closed.")
 	}
-}
+} /*}}}*/
 
-func (srv *FoolServer) serverTimeout() {
+// When restart server,client connected will
+// been closed forcefully after 60s
+func (srv *FoolServer) serverTimeout() { /*{{{*/
 	defer func() {
 		if r := recover(); r != nil {
-			log.Println("WaitGroup at 0", r)
+			logger.RunLog("[Notice] WaitGroup at 0")
 		}
 	}()
 	if serverStat != STATE_SHUTTING_DOWN {
@@ -223,23 +226,25 @@ func (srv *FoolServer) serverTimeout() {
 		}
 		connWg.Done()
 	}
-	log.Println("[STOP - Hammer Time] Forcefully shutting down parent")
-}
+	logger.RunLog("[Notice] Forcefully shutting down parent")
+} /*}}}*/
 
-func (srv *FoolServer) createPid(pid int) {
+func (srv *FoolServer) createPid(pid int) { /*{{{*/
 	fd, _ := os.OpenFile(srv.config.Pid, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
 	defer fd.Close()
 	fd.WriteString(fmt.Sprintf("%d", pid))
 
 	_, err := os.Stat(srv.config.Pid)
 	if err != nil && os.IsNotExist(err) {
-		fmt.Printf("Can't create %q\n", srv.config.Pid)
+		logger.RunLog("[Warning] Can't create pid file " + srv.config.Pid)
 		os.Exit(1)
 	}
-}
+} /*}}}*/
 
-//重启server
-func (srv *FoolServer) forkServer() {
+// Restart server
+// First,dup listener file fd
+// Then,add this fd to Command ExtraFiles and create a new process
+func (srv *FoolServer) forkServer() { /*{{{*/
 	runLock.Lock()
 	defer runLock.Unlock()
 
@@ -273,8 +278,8 @@ func (srv *FoolServer) forkServer() {
 
 	err := cmd.Start()
 	if err != nil {
-		log.Fatalf("Restart: Failed to launch, error: %v", err)
+		logger.RunLog(fmt.Sprintf("[Error] Restart: Failed to launch, error: %s", err.Error()))
 	}
 
 	return
-}
+} /*}}}*/

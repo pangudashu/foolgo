@@ -142,13 +142,13 @@ func (this *Controller) Location(url string) {
 	http.Redirect(this.response.Writer, this.request.request, url, 301)
 }
 
-//获取所有上传文件
-//files, _ := this.GetUploadFiles("user_icon")
-//for i, _ := range files {
-//	file, _ := files[i].Open()
-//	defer file.Close()
-//	log.Print(this.GetFileSize(&file))
-//}
+// 获取所有上传文件
+// files, _ := this.GetUploadFiles("user_icon")
+// for i, _ := range files {
+//	 file, _ := files[i].Open()
+//	 defer file.Close()
+//	 log.Print(this.GetFileSize(&file))
+// }
 func (this *Controller) GetUploadFiles(key string) ([]*multipart.FileHeader, error) {
 	return this.request.GetUploadFiles(key)
 }

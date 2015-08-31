@@ -9,7 +9,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	//"strconv"
 	"strings"
 	"time"
 )
@@ -18,7 +17,7 @@ var (
 	GzipExt = []string{".css", ".js", ".html"}
 )
 
-func OutStaticFile(response *Response, request *Request, file string) {
+func OutStaticFile(response *Response, request *Request, file string) { /*{{{*/
 	file_path := response.server_config.Root + file
 	fi, err := os.Stat(file_path)
 	if err != nil && os.IsNotExist(err) {
@@ -75,9 +74,9 @@ func OutStaticFile(response *Response, request *Request, file string) {
 
 	response.Header("Content-Encoding", "gzip")
 	http.ServeContent(response.Writer, request.request, file_path, mod_time, mf)
-}
+} /*}}}*/
 
-func OutErrorHtml(response *Response, request *Request, http_code int) {
+func OutErrorHtml(response *Response, request *Request, http_code int) { /*{{{*/
 	response.Header("Status", fmt.Sprintf("%d", http_code))
 	if err_html, ok := response.server_config.HttpErrorHtml[http_code]; ok == true {
 		if fi, err := os.Stat(err_html); (err == nil || os.IsExist(err)) && fi.IsDir() != true {
@@ -137,7 +136,7 @@ func OutErrorHtml(response *Response, request *Request, http_code int) {
 	response.Header("X-Content-Type-Options", "nosniff")
 	response.Writer.WriteHeader(http_code)
 	fmt.Fprintln(response.Writer, error_list[http_code])
-}
+} /*}}}*/
 
 type memFile struct {
 	fi     *memFileInfo

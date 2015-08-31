@@ -23,20 +23,22 @@ var (
 	router_rewrite_key = make(map[string]string)
 )
 
-func NewRouter() *Router {
+func NewRouter() *Router { /*{{{*/
 	if router_instance != nil {
 		return router_instance
 	}
 	router_instance = &Router{}
 
 	return router_instance
-}
+} /*}}}*/
 
 func GetRouter() *Router {
 	return router_instance
 }
 
-func RegRouter(controller FGController, controller_name string) error {
+// Reg router in controller by func RegRouter() map[string]interface{}
+// support rewrite
+func RegRouter(controller FGController, controller_name string) error { /*{{{*/
 	url_map := controller.RegRouter()
 	if url_map == nil {
 		return nil
@@ -70,9 +72,10 @@ func RegRouter(controller FGController, controller_name string) error {
 		}
 	}
 	return nil
-}
+} /*}}}*/
 
-func createRewriteRouter(pattern, method, controller, action string) *router_rewrite {
+// create rewrite router
+func createRewriteRouter(pattern, method, controller, action string) *router_rewrite { /*{{{*/
 	if pattern == "" || action == "" {
 		return nil
 	}
@@ -108,9 +111,9 @@ func createRewriteRouter(pattern, method, controller, action string) *router_rew
 		}
 	}
 	return router
-}
+} /*}}}*/
 
-func (this *Router) MatchRewrite(url, method string) (string, string, map[string]string, error) {
+func (this *Router) MatchRewrite(url, method string) (string, string, map[string]string, error) { /*{{{*/
 	if _, ok := router_rewrite_map[method]; ok == false {
 		return "", "", nil, errors.New("No match")
 	}
@@ -125,9 +128,9 @@ func (this *Router) MatchRewrite(url, method string) (string, string, map[string
 	}
 
 	return "", "", nil, errors.New("No match")
-}
+} /*}}}*/
 
-func (this *Router) matchRouter(router *router_rewrite, paths []string) (map[string]string, bool) {
+func (this *Router) matchRouter(router *router_rewrite, paths []string) (map[string]string, bool) { /*{{{*/
 	var match_param map[string]string
 	var cnt int
 	for pos, part := range paths {
@@ -166,11 +169,12 @@ func (this *Router) matchRouter(router *router_rewrite, paths []string) (map[str
 		return nil, false
 	}
 	return match_param, true
-}
+} /*}}}*/
 
-/*{{{ func (this *Router) ParseMethod() error
- */
-func (this *Router) ParseMethod(method string) (controller_name string, action_name string) {
+// Get controller and action name from
+// request parame "m"
+// eg: demo.index,return demo index
+func (this *Router) ParseMethod(method string) (controller_name string, action_name string) { /*{{{*/
 	method_map := strings.SplitN(method, ".", 2)
 	switch len(method_map) {
 	case 1:
@@ -180,13 +184,10 @@ func (this *Router) ParseMethod(method string) (controller_name string, action_n
 		action_name = method_map[1]
 	}
 	return controller_name, action_name
-}
+} /*}}}*/
 
-/*}}}*/
-
-/*{{{ func (this *Router) NewController(controller_name string) (reflect.Value, HTTP_STATUS)
- */
-func (this *Router) NewController(controller_name string) (reflect.Value, error) {
+// create new controller by controller name
+func (this *Router) NewController(controller_name string) (reflect.Value, error) { /*{{{*/
 	register := GetRegister()
 
 	//m_arr := make([]reflect.Value, 0)
@@ -210,6 +211,4 @@ func (this *Router) NewController(controller_name string) (reflect.Value, error)
 	}
 
 	return controller_instance, nil
-}
-
-/*}}}*/
+} /*}}}*/
