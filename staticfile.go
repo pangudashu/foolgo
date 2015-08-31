@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"compress/gzip"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
-	"strconv"
+	//"strconv"
 	"strings"
 	"time"
 )
@@ -77,6 +78,7 @@ func OutStaticFile(response *Response, request *Request, file string) {
 }
 
 func OutErrorHtml(response *Response, request *Request, http_code int) {
+	response.Header("Status", fmt.Sprintf("%d", http_code))
 	if err_html, ok := response.server_config.HttpErrorHtml[http_code]; ok == true {
 		if fi, err := os.Stat(err_html); (err == nil || os.IsExist(err)) && fi.IsDir() != true {
 			http.ServeFile(response.Writer, request.request, err_html)
@@ -84,7 +86,57 @@ func OutErrorHtml(response *Response, request *Request, http_code int) {
 		}
 	}
 
-	http.Error(response.Writer, strconv.Itoa(http_code), http_code)
+	error_list := make(map[int]string)
+
+	error_list[403] = `
+	<html>
+	<head><title>403 Forbidden</title></head>
+	<body bgcolor="white">
+	<center><h1>403 Forbidden</h1></center>
+	<hr><center>foolgo/1.0.0</center>
+	</body>
+	</html>
+	<!-- a padding to disable MSIE and Chrome friendly error page -->
+	<!-- a padding to disable MSIE and Chrome friendly error page -->
+	<!-- a padding to disable MSIE and Chrome friendly error page -->
+	<!-- a padding to disable MSIE and Chrome friendly error page -->
+	<!-- a padding to disable MSIE and Chrome friendly error page -->
+	<!-- a padding to disable MSIE and Chrome friendly error page -->
+	`
+	error_list[404] = `
+	<html>
+	<head><title>404 Not Found</title></head>
+	<body bgcolor="white">
+	<center><h1>404 Not Found</h1></center>
+	<hr><center>foolgo/1.0.0</center>
+	</body>
+	</html>
+	<!-- a padding to disable MSIE and Chrome friendly error page -->
+	<!-- a padding to disable MSIE and Chrome friendly error page -->
+	<!-- a padding to disable MSIE and Chrome friendly error page -->
+	<!-- a padding to disable MSIE and Chrome friendly error page -->
+	<!-- a padding to disable MSIE and Chrome friendly error page -->
+	<!-- a padding to disable MSIE and Chrome friendly error page -->
+	`
+	error_list[500] = `
+	<html>
+	<head><title>500 Internal Server Error</title></head>
+	<body bgcolor="white">
+	<center><h1>500 Internal Server Error</h1></center>
+	<hr><center>foolgo/1.0.0</center>
+	</body>
+	</html>
+	<!-- a padding to disable MSIE and Chrome friendly error page -->
+	<!-- a padding to disable MSIE and Chrome friendly error page -->
+	<!-- a padding to disable MSIE and Chrome friendly error page -->
+	<!-- a padding to disable MSIE and Chrome friendly error page -->
+	<!-- a padding to disable MSIE and Chrome friendly error page -->
+	<!-- a padding to disable MSIE and Chrome friendly error page -->
+	`
+	response.Header("Content-Type", "text/html; charset=utf-8")
+	response.Header("X-Content-Type-Options", "nosniff")
+	response.Writer.WriteHeader(http_code)
+	fmt.Fprintln(response.Writer, error_list[http_code])
 }
 
 type memFile struct {

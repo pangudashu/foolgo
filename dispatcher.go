@@ -1,6 +1,7 @@
 package foolgo
 
 import (
+	"fmt"
 	"net/http"
 	"reflect"
 	"strings"
@@ -45,6 +46,8 @@ func (this *Dispatcher) Dispatch_handler(w http.ResponseWriter, r *http.Request)
 	var match_param map[string]string
 	var ok error
 
+	response.Header("Status", fmt.Sprintf("%d", http.StatusOK))
+
 	url := strings.TrimRight(request.Url(), "/")
 	if url != "" { //有url
 		controller_name, action_name, match_param, ok = router.MatchRewrite(url, request.Method())
@@ -86,6 +89,7 @@ func (this *Dispatcher) Dispatch_handler(w http.ResponseWriter, r *http.Request)
 
 	init_handler := controller.MethodByName("Init")
 	if init_handler.IsValid() == false {
+		logger.ErrorLog("Can't find method of \"Init\" in controller " + controller_name)
 		OutErrorHtml(response, request, http.StatusInternalServerError)
 		return
 	}
@@ -105,6 +109,7 @@ func (this *Dispatcher) Dispatch_handler(w http.ResponseWriter, r *http.Request)
 	init_result := init_handler.Call(init_params)
 
 	if reflect.Indirect(init_result[0]).Bool() == false {
+		logger.ErrorLog("Method of \"Init\" in controller " + controller_name + " return false")
 		OutErrorHtml(response, request, http.StatusInternalServerError)
 		return
 	}
@@ -114,6 +119,8 @@ func (this *Dispatcher) Dispatch_handler(w http.ResponseWriter, r *http.Request)
 	for _, v := range request_handlers {
 		v.Call(request_params)
 	}
+
+	response.Header("Connection", request.Header("Connection"))
 }
 
 /*}}}*/

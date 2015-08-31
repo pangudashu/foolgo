@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 )
 
 var (
@@ -85,10 +86,36 @@ func (this *Application) RegController(register_controller_map map[string]FGCont
  * Http请求入口
  */
 func (this *Application) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	start_time := time.Now()
+
 	if r.URL.Path != "/" {
 		matchRewrite(r)
 	}
 	this.dispatcher.Dispatch_handler(w, r)
+
+	end_time := time.Now()
+
+	request_time := float64(end_time.UnixNano()-start_time.UnixNano()) / 1000000000
+
+	log_format := "%s - [%s] %s %s %s %s %.5f \"%s\"" //ip - [time] method uri scheme status request_time agent
+	access_log := fmt.Sprintf(log_format,
+		this.Isset(r.RemoteAddr),
+		Date("Y/m/d H:i:s", start_time),
+		this.Isset(r.Method),
+		this.Isset(r.URL.RequestURI()),
+		this.Isset(r.Proto),
+		this.Isset(w.Header().Get("Status")),
+		request_time,
+		this.Isset(r.Header.Get("User-Agent")),
+	)
+	logger.AccessLog(access_log)
 }
 
 /*}}}*/
+
+func (this *Application) Isset(params string) string {
+	if params == "" {
+		return "-"
+	}
+	return params
+}

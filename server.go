@@ -29,6 +29,8 @@ var (
 	operate    string
 	serverStat int
 	isForking  bool
+	restart    string
+	logger     *Log
 )
 
 type HttpServerConfig struct {
@@ -36,6 +38,9 @@ type HttpServerConfig struct {
 	Root          string //web访问目录
 	ViewPath      string
 	Addr          string
+	AccessLog     string
+	ErrorLog      string
+	StandOutPut   string
 	IsGzip        bool
 	ZipMinSize    int
 	ReadTimeout   int
@@ -56,8 +61,6 @@ type FoolServer struct {
 	App         *Application
 	config      *HttpServerConfig
 }
-
-var restart string
 
 func init() {
 	runLock = &sync.Mutex{}
@@ -136,10 +139,9 @@ func (srv *FoolServer) RegRewrite(rewrite map[string]string) *FoolServer {
 }
 
 func (srv *FoolServer) Run() {
-
+	logger = NewLog(srv.config.AccessLog, srv.config.ErrorLog, srv.config.StandOutPut)
 	//解析模板
 	CompileTpl(srv.config.ViewPath)
-
 	//信号处理函数
 	go srv.signalHandle()
 
