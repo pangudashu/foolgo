@@ -117,7 +117,7 @@ func (this *Request) Param(key string) string {
 	return this.request.Form.Get(key)
 }
 
-func (this *Request) ParamGet() (data map[string]string) {
+func (this *Request) ParamGet() (data map[string]string) { /*{{{*/
 	err := this.ParseMultiForm()
 	if err != nil {
 		return nil
@@ -136,9 +136,9 @@ func (this *Request) ParamGet() (data map[string]string) {
 		}
 	}
 	return data
-}
+} /*}}}*/
 
-func (this *Request) ParamPost() (data map[string]interface{}) {
+func (this *Request) ParamPost() (data map[string]interface{}) { /*{{{*/
 	err := this.ParseMultiForm()
 	if err != nil {
 		return nil
@@ -155,11 +155,9 @@ func (this *Request) ParamPost() (data map[string]interface{}) {
 		}
 	}
 	return data
-}
+} /*}}}*/
 
-/*{{{ func (this *Request) ParseForm() error
- */
-func (this *Request) ParseMultiForm() error {
+func (this *Request) ParseMultiForm() error { /*{{{*/
 	if this.form_parsed == true || this.request.Form != nil || this.request.PostForm != nil || this.request.MultipartForm != nil {
 		return nil
 	}
@@ -173,11 +171,9 @@ func (this *Request) ParseMultiForm() error {
 		return errors.New("Error parsing request body:" + err.Error())
 	}
 	return nil
-}
+} /*}}}*/
 
-/*}}}*/
-
-func (this *Request) GetUploadFiles(key string) ([]*multipart.FileHeader, error) {
+func (this *Request) GetUploadFiles(key string) ([]*multipart.FileHeader, error) { /*{{{*/
 	this.ParseMultiForm()
 
 	if this.request.MultipartForm == nil {
@@ -188,9 +184,9 @@ func (this *Request) GetUploadFiles(key string) ([]*multipart.FileHeader, error)
 		return files, nil
 	}
 	return nil, http.ErrMissingFile
-}
+} /*}}}*/
 
-func (this *Request) MoveUploadFile(fromfile, tofile string) error {
+func (this *Request) MoveUploadFile(fromfile, tofile string) error { /*{{{*/
 	file, _, err := this.request.FormFile(fromfile)
 	if err != nil {
 		return err
@@ -205,7 +201,7 @@ func (this *Request) MoveUploadFile(fromfile, tofile string) error {
 	defer f.Close()
 	io.Copy(f, file)
 	return nil
-}
+} /*}}}*/
 
 type Size interface {
 	Size() int64

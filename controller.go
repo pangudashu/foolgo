@@ -24,13 +24,11 @@ func (this *Controller) Init(request *Request, response *Response) bool {
 	return true
 }
 
-//no use just implement FGController
+// No use just implement FGController
 func (this *Controller) RegRouter() map[string]interface{} {
 	return nil
 }
 
-/*{{{ func (this *Controller) Param(key string, default_value ...string) string
- */
 func (this *Controller) Param(key string, default_value ...string) string {
 	v := this.request.Param(key)
 	if v == "" && default_value != nil {
@@ -39,18 +37,10 @@ func (this *Controller) Param(key string, default_value ...string) string {
 	return v
 }
 
-/*}}}*/
-
-/*{{{ func (this *Controller) Assign(key interface{}, value interface{})
- */
 func (this *Controller) Assign(key interface{}, value interface{}) {
 	this.view.Assign(key, value)
 }
 
-/*}}}*/
-
-/*{{{ func (this *Controller) Display(view_path ...string)
- */
 func (this *Controller) Display(view_path ...string) {
 	bytes, err := this.Render(view_path...)
 
@@ -63,10 +53,6 @@ func (this *Controller) Display(view_path ...string) {
 	}
 }
 
-/*}}}*/
-
-/*{{{ func (this *Controller) Render(view_path ...string) ([]byte, error)
- */
 func (this *Controller) Render(view_path ...string) ([]byte, error) {
 	var view_name string
 	if view_path == nil || view_path[0] == "" {
@@ -76,8 +62,6 @@ func (this *Controller) Render(view_path ...string) ([]byte, error) {
 	}
 	return this.view.Render(view_name)
 }
-
-/*}}}*/
 
 func (this *Controller) Cookie(name string) string {
 	return this.request.Cookie(name)
