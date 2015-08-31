@@ -16,7 +16,10 @@ type Rewrite struct {
 	regex   *regexp.Regexp
 }
 
-func regRewrite(list map[string]string) {
+// This most like nginx rewrite module
+// Support regex
+// This is different from controller rewrite-router
+func regRewrite(list map[string]string) { /*{{{*/
 	for p, m := range list {
 		if strings.Index(p, "(") < 0 {
 			if rewrite_static == nil {
@@ -36,9 +39,12 @@ func regRewrite(list map[string]string) {
 		}
 		rewrite_regexp = append(rewrite_regexp, reg)
 	}
-}
+} /*}}}*/
 
-func matchRewrite(r *http.Request) {
+// Match rewrite
+// Note that this will change URL.RawQuery
+// and URL.Path in http.Request
+func matchRewrite(r *http.Request) { /*{{{*/
 	url := r.URL.Path
 	var rewrite_url string = ""
 	var ok bool
@@ -80,4 +86,4 @@ RESET_URI:
 	} else {
 		r.URL.Path = uri_map[0]
 	}
-}
+} /*}}}*/

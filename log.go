@@ -1,7 +1,6 @@
 package foolgo
 
 import (
-	//"fmt"
 	"log"
 	"os"
 )
@@ -18,7 +17,7 @@ type Log struct {
 	RunLogger    *log.Logger
 }
 
-func NewLog(access_log, error_log, run_log string) (logger *Log) {
+func NewLog(access_log, error_log, run_log string) (logger *Log) { /*{{{*/
 	logger = &Log{}
 
 	if access_log != "" {
@@ -35,25 +34,27 @@ func NewLog(access_log, error_log, run_log string) (logger *Log) {
 	}
 
 	return logger
-}
+} /*}}}*/
 
-func (this *Log) AccessLog(msg interface{}) {
+// Request access log like nginx
+func (this *Log) AccessLog(msg interface{}) { /*{{{*/
 	if this.AccessLogger != nil {
 		this.AccessLogger.Println(msg)
 	}
-}
+} /*}}}*/
 
-func (this *Log) ErrorLog(msg interface{}) {
+func (this *Log) ErrorLog(msg interface{}) { /*{{{*/
 	//in fact,this error may never happend
 	if this.ErrorLogger != nil {
 		this.ErrorLogger.Println(msg)
 	}
-}
+} /*}}}*/
 
-func (this *Log) RunLog(msg interface{}) {
+// System run log
+func (this *Log) RunLog(msg interface{}) { /*{{{*/
 	if this.RunLogger != nil {
 		this.RunLogger.Println(msg)
 	} else {
 		//log.Println(msg)
 	}
-}
+} /*}}}*/
