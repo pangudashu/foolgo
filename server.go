@@ -25,10 +25,8 @@ var (
 	runLock    *sync.Mutex
 	connWg     sync.WaitGroup
 	isChild    bool
-	operate    string
 	serverStat int
 	isForking  bool
-	restart    string
 	logger     *Log
 )
 
@@ -65,17 +63,9 @@ func init() {
 	runLock = &sync.Mutex{}
 
 	flag.BoolVar(&isChild, "reload", false, "listen on open fd (after forking)")
-
-	var cmd *string = flag.String("s", "start", "[cmd:restart|stop]")
 	flag.Parse()
-	operate = *cmd
-
 	//防止重复fork
 	isForking = false
-
-	if operate == "restart" {
-	} else if operate == "stop" {
-	}
 }
 
 // Init a http(s) server
