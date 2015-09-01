@@ -2,7 +2,6 @@ package foolgo
 
 import (
 	"errors"
-	//"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -96,15 +95,17 @@ func (this *Request) Header(key string) string {
 	return this.request.Header.Get(key)
 }
 
-func (this *Request) Cookie(key string) string {
+// Get cookie
+func (this *Request) Cookie(key string) string { /*{{{*/
 	cookie, err := this.request.Cookie(key)
 	if err != nil {
 		return ""
 	}
 	return cookie.Value
-}
+} /*}}}*/
 
-func (this *Request) Param(key string) string {
+// Get request param by key
+func (this *Request) Param(key string) string { /*{{{*/
 	if this.rewrite_params != nil {
 		if d, ok := this.rewrite_params[key]; ok == true {
 			return d
@@ -115,8 +116,9 @@ func (this *Request) Param(key string) string {
 		return ""
 	}
 	return this.request.Form.Get(key)
-}
+} /*}}}*/
 
+// Get all request params passed by GET method
 func (this *Request) ParamGet() (data map[string]string) { /*{{{*/
 	err := this.ParseMultiForm()
 	if err != nil {
@@ -138,6 +140,7 @@ func (this *Request) ParamGet() (data map[string]string) { /*{{{*/
 	return data
 } /*}}}*/
 
+// Get all request params passed by POST method
 func (this *Request) ParamPost() (data map[string]interface{}) { /*{{{*/
 	err := this.ParseMultiForm()
 	if err != nil {
@@ -173,6 +176,7 @@ func (this *Request) ParseMultiForm() error { /*{{{*/
 	return nil
 } /*}}}*/
 
+// Get all upload files
 func (this *Request) GetUploadFiles(key string) ([]*multipart.FileHeader, error) { /*{{{*/
 	this.ParseMultiForm()
 
@@ -186,6 +190,7 @@ func (this *Request) GetUploadFiles(key string) ([]*multipart.FileHeader, error)
 	return nil, http.ErrMissingFile
 } /*}}}*/
 
+// Save upload file
 func (this *Request) MoveUploadFile(fromfile, tofile string) error { /*{{{*/
 	file, _, err := this.request.FormFile(fromfile)
 	if err != nil {
@@ -207,6 +212,7 @@ type Size interface {
 	Size() int64
 }
 
+// Get upload file size
 func (this *Request) GetFileSize(file *multipart.File) int64 {
 	if sizeInterface, ok := (*file).(Size); ok {
 		return sizeInterface.Size()

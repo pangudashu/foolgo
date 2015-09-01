@@ -36,13 +36,12 @@ func filterValue(v string) string {
 	return cookieValueFilter.Replace(v)
 }
 
+// Set http response header
 func (this *Response) Header(key, val string) {
 	this.Writer.Header().Set(key, val)
 }
 
-/*{{{ func (this *Response) Body(html_content []byte)
- */
-func (this *Response) Body(html_content []byte) {
+func (this *Response) Body(html_content []byte) { /*{{{*/
 	accept_encoding := this.request.Header("Accept-Encoding")
 	if IsGzip == true && len(html_content) >= ZipMinSize && accept_encoding != "" && strings.Index(accept_encoding, "gzip") >= 0 {
 		this.Header("Content-Encoding", "gzip")
@@ -53,14 +52,11 @@ func (this *Response) Body(html_content []byte) {
 	} else {
 		this.Writer.Write(html_content)
 	}
-}
+} /*}}}*/
 
-/*}}}*/
-
-/*{{{ func (this *Response) Cookie(name string, value string, others ...interface{})
- *@Copy from beego
- */
-func (this *Response) Cookie(name string, value string, others ...interface{}) {
+// Set cookie
+// Copy from beego @https://github.com/astaxie/beego
+func (this *Response) Cookie(name string, value string, others ...interface{}) { /*{{{*/
 	var b bytes.Buffer
 	fmt.Fprintf(&b, "%s=%s", filterName(name), filterValue(value))
 	if len(others) > 0 {
@@ -133,13 +129,10 @@ func (this *Response) Cookie(name string, value string, others ...interface{}) {
 	}
 
 	this.Writer.Header().Add("Set-Cookie", b.String())
-}
+} /*}}}*/
 
-/*}}}*/
-
-/*{{{ func (this *Response) Json(data interface{}, coding ...bool) error
- */
-func (this *Response) Json(data interface{}, coding ...bool) error {
+// Set output type:json
+func (this *Response) Json(data interface{}, coding ...bool) error { /*{{{*/
 	this.Header("Content-Type", "application/json;charset=UTF-8")
 
 	var content []byte
@@ -155,13 +148,9 @@ func (this *Response) Json(data interface{}, coding ...bool) error {
 	}
 	this.Body(content)
 	return nil
-}
+} /*}}}*/
 
-/*}}}*/
-
-/*{{{ func (this *Response) Jsonp(callback string, data interface{}, coding ...bool) error
- */
-func (this *Response) Jsonp(callback string, data interface{}, coding ...bool) error {
+func (this *Response) Jsonp(callback string, data interface{}, coding ...bool) error { /*{{{*/
 	this.Header("Content-Type", "application/javascript;charset=UTF-8")
 
 	var content []byte
@@ -182,13 +171,10 @@ func (this *Response) Jsonp(callback string, data interface{}, coding ...bool) e
 
 	this.Body(ck.Bytes())
 	return nil
-}
+} /*}}}*/
 
-/*}}}*/
-
-/*{{{ func unicode(str string) string
- */
-func unicode(str string) string {
+// Convert to unicode
+func unicode(str string) string { /*{{{*/
 	rs := []rune(str)
 	jsons := ""
 	for _, r := range rs {
@@ -200,6 +186,4 @@ func unicode(str string) string {
 		}
 	}
 	return jsons
-}
-
-/*}}}*/
+} /*}}}*/
