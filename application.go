@@ -64,6 +64,12 @@ func (this *Application) AddViewFunc(key string, func_name interface{}) {
 	AddViewFunc(key, func_name)
 }
 
+func (this *Application) AddCompressType(file_ext []string) {
+	for _, v := range file_ext {
+		AddCompressType(v)
+	}
+}
+
 //register controller
 func (this *Application) RegController(register_controller_map map[string]FGController) { /*{{{*/
 	for controller_name, controller := range register_controller_map {

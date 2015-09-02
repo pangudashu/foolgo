@@ -17,6 +17,13 @@ var (
 	GzipExt = []string{".css", ".js", ".html"}
 )
 
+func AddCompressType(ext string) {
+	if ext != "" {
+		GzipExt = append(GzipExt, ext)
+	}
+	fmt.Println(GzipExt)
+}
+
 func OutStaticFile(response *Response, request *Request, file string) { /*{{{*/
 	file_path := response.server_config.Root + file
 	fi, err := os.Stat(file_path)
