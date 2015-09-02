@@ -14,9 +14,6 @@ var (
 	DEFAULT_ACTION         string       = "index"
 	ACTION_SUFFIX          string       = "Action"
 	HTTP_METHOD_PARAM_NAME string       = "m"
-	//IsGzip                 bool         = true
-	//ZipMinSize             int          = 1024
-	RunMod string = "product"
 )
 
 type Application struct {
@@ -44,9 +41,6 @@ func NewApplication(http_server_config *HttpServerConfig) (*Application, error) 
 	application_instance = &Application{
 		server_config: http_server_config,
 	}
-	RunMod = http_server_config.RunMod
-	//IsGzip = http_server_config.IsGzip
-	//ZipMinSize = http_server_config.ZipMinSize
 
 	//init mime
 	initMime()

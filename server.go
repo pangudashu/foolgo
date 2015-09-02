@@ -30,6 +30,7 @@ var (
 	logger          *Log
 	CompressType    int
 	CompressMinSize int
+	RunMod          string = "product"
 )
 
 type HttpServerConfig struct {
@@ -106,6 +107,8 @@ func NewServer(server_config *HttpServerConfig) (*FoolServer, error) { /*{{{*/
 			CompressMinSize = server_config.CompressMin
 		}
 	}
+
+	RunMod = server_config.RunMod
 
 	srv := &FoolServer{config: server_config}
 
