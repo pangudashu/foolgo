@@ -34,17 +34,15 @@ var (
 )
 
 type HttpServerConfig struct {
-	RunMod      string
-	Root        string //web访问目录
-	ViewPath    string
-	Addr        string
-	AccessLog   string
-	ErrorLog    string
-	RunLog      string
-	Compress    int
-	CompressMin int
-	//IsGzip        bool
-	//ZipMinSize    int
+	RunMod        string
+	Root          string //web访问目录
+	ViewPath      string
+	Addr          string
+	AccessLog     string
+	ErrorLog      string
+	RunLog        string
+	Compress      int
+	CompressMin   int
 	ReadTimeout   int
 	WriteTimeout  int
 	MaxHeaderByte int
