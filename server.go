@@ -22,24 +22,28 @@ const (
 )
 
 var (
-	runLock    *sync.Mutex
-	connWg     sync.WaitGroup
-	isChild    bool
-	serverStat int
-	isForking  bool
-	logger     *Log
+	runLock         *sync.Mutex
+	connWg          sync.WaitGroup
+	isChild         bool
+	serverStat      int
+	isForking       bool
+	logger          *Log
+	CompressType    int
+	CompressMinSize int
 )
 
 type HttpServerConfig struct {
-	RunMod        string
-	Root          string //web访问目录
-	ViewPath      string
-	Addr          string
-	AccessLog     string
-	ErrorLog      string
-	RunLog        string
-	IsGzip        bool
-	ZipMinSize    int
+	RunMod      string
+	Root        string //web访问目录
+	ViewPath    string
+	Addr        string
+	AccessLog   string
+	ErrorLog    string
+	RunLog      string
+	Compress    int
+	CompressMin int
+	//IsGzip        bool
+	//ZipMinSize    int
 	ReadTimeout   int
 	WriteTimeout  int
 	MaxHeaderByte int
@@ -87,6 +91,20 @@ func NewServer(server_config *HttpServerConfig) (*FoolServer, error) { /*{{{*/
 	}
 	if server_config.Pid == "" {
 		return nil, errors.New("foolgo.HttpServerConfig.Pid can't be empty")
+	}
+	if server_config.Compress > 2 || server_config.Compress < -1 {
+		return nil, errors.New("Comress value invalid.[COMPRESS_CLOSE|COMPRESS_GZIP|COMPRESS_FLATE]")
+	} else {
+		if server_config.Compress == 0 {
+			CompressType = COMPRESS_GZIP
+		} else {
+			CompressType = server_config.Compress
+		}
+		if server_config.CompressMin == 0 {
+			CompressMinSize = 200
+		} else {
+			CompressMinSize = server_config.CompressMin
+		}
 	}
 
 	srv := &FoolServer{config: server_config}

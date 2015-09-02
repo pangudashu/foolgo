@@ -2,6 +2,7 @@ package foolgo
 
 import (
 	"bytes"
+	"compress/flate"
 	"compress/gzip"
 	"errors"
 	"fmt"
@@ -13,6 +14,12 @@ import (
 	"time"
 )
 
+const (
+	COMPRESS_CLOSE = -1
+	COMPRESS_GZIP  = 1
+	COMPRESS_FLATE = 2
+)
+
 var (
 	GzipExt = []string{".css", ".js", ".html"}
 )
@@ -21,7 +28,6 @@ func AddCompressType(ext string) {
 	if ext != "" {
 		GzipExt = append(GzipExt, ext)
 	}
-	fmt.Println(GzipExt)
 }
 
 func OutStaticFile(response *Response, request *Request, file string) { /*{{{*/
@@ -37,7 +43,7 @@ func OutStaticFile(response *Response, request *Request, file string) { /*{{{*/
 	file_size := fi.Size()
 	mod_time := fi.ModTime()
 
-	if IsGzip == false || file_size < int64(ZipMinSize) {
+	if CompressType == COMPRESS_CLOSE || file_size < int64(CompressMinSize) || (strings.Index(request.Header("Accept-Encoding"), "gzip") < 0 && strings.Index(request.Header("Accept-Encoding"), "flate") < 0) {
 		http.ServeFile(response.Writer, request.request, file_path)
 		return
 	}
@@ -60,13 +66,26 @@ func OutStaticFile(response *Response, request *Request, file string) { /*{{{*/
 	}
 
 	var b bytes.Buffer
-	output_writer, err := gzip.NewWriterLevel(&b, gzip.BestCompression)
-	if err != nil {
-		OutErrorHtml(response, request, http.StatusNotFound)
-		return
+
+	switch CompressType {
+	case COMPRESS_GZIP:
+		output_writer, err := gzip.NewWriterLevel(&b, gzip.BestCompression)
+		if err != nil {
+			OutErrorHtml(response, request, http.StatusNotFound)
+			return
+		}
+		_, err = io.Copy(output_writer, osfile)
+		output_writer.Close()
+	case COMPRESS_FLATE:
+		output_writer, err := flate.NewWriter(&b, flate.BestSpeed)
+		if err != nil {
+			OutErrorHtml(response, request, http.StatusNotFound)
+			return
+		}
+		_, err = io.Copy(output_writer, osfile)
+		output_writer.Close()
 	}
-	_, err = io.Copy(output_writer, osfile)
-	output_writer.Close()
+
 	if err != nil {
 		OutErrorHtml(response, request, http.StatusNotFound)
 		return
@@ -79,7 +98,12 @@ func OutStaticFile(response *Response, request *Request, file string) { /*{{{*/
 	cfi := &memFileInfo{fi, mod_time, content, int64(len(content)), file_size}
 	mf := &memFile{cfi, 0}
 
-	response.Header("Content-Encoding", "gzip")
+	switch CompressType {
+	case COMPRESS_GZIP:
+		response.Header("Content-Encoding", "gzip")
+	case COMPRESS_FLATE:
+		response.Header("Content-Encoding", "deflate")
+	}
 	http.ServeContent(response.Writer, request.request, file_path, mod_time, mf)
 } /*}}}*/
 

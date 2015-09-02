@@ -2,6 +2,7 @@ package foolgo
 
 import (
 	"bytes"
+	"compress/flate"
 	"compress/gzip"
 	"encoding/json"
 	"fmt"
@@ -43,12 +44,19 @@ func (this *Response) Header(key, val string) {
 
 func (this *Response) Body(html_content []byte) { /*{{{*/
 	accept_encoding := this.request.Header("Accept-Encoding")
-	if IsGzip == true && len(html_content) >= ZipMinSize && accept_encoding != "" && strings.Index(accept_encoding, "gzip") >= 0 {
-		this.Header("Content-Encoding", "gzip")
-
-		output_writer, _ := gzip.NewWriterLevel(this.Writer, gzip.BestSpeed)
-		defer output_writer.Close()
-		output_writer.Write(html_content)
+	if CompressType != COMPRESS_CLOSE && len(html_content) >= CompressMinSize && accept_encoding != "" && (strings.Index(accept_encoding, "gzip") >= 0 || strings.Index(accept_encoding, "flate") >= 0) {
+		switch CompressType {
+		case COMPRESS_GZIP:
+			this.Header("Content-Encoding", "gzip")
+			output_writer, _ := gzip.NewWriterLevel(this.Writer, gzip.BestSpeed)
+			defer output_writer.Close()
+			output_writer.Write(html_content)
+		case COMPRESS_FLATE:
+			this.Header("Content-Encoding", "deflate")
+			output_writer, _ := flate.NewWriter(this.Writer, flate.BestSpeed)
+			defer output_writer.Close()
+			output_writer.Write(html_content)
+		}
 	} else {
 		this.Writer.Write(html_content)
 	}
