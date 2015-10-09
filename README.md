@@ -17,7 +17,7 @@ golang相关的web框架已经有很多了，像beego、martini、revel，为什
 
 ### 使用
 	go get github.com/pangudashu/foolgo
-	具体使用参考示例
+	具体使用参考example示例代码
 
 ### 示例
 Demo目录 ：$GOPATH/src/github.com/pangudashu/foolgo/example
