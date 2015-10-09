@@ -1,6 +1,7 @@
 package foolgo
 
 import (
+	"fmt"
 	"net"
 	"os"
 	"syscall"
