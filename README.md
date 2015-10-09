@@ -22,8 +22,8 @@ golang相关的web框架已经有很多了，像beego、martini、revel，为什
 ### 示例
 Demo目录 ：$GOPATH/src/github.com/pangudashu/foolgo/example
 	
-	cd $GOPATH/src/github.com/pangudashu/foolgo/example
-	vim main.go
+	# cd $GOPATH/src/github.com/pangudashu/foolgo/example
+	# vim main.go
 
 	//修改server config
 	server_config := &foolgo.HttpServerConfig{
@@ -38,7 +38,12 @@ Demo目录 ：$GOPATH/src/github.com/pangudashu/foolgo/example
 	Pid:         "/tmp/example.pid",                                                             //进程号保存地址
 	}
 
+	//编译
+	# go install
+	//启动
+	# $GOPATH/bin/example
 
+	浏览器访问：http://IP:8090/?m=demo.index&id=1234 或 http://IP:8090/demo/1234 (controller中自定义路由)
 
 
 
