@@ -13,6 +13,7 @@ func (demo *DemoController) IndexAction() {
 	demo.Assign("time", time.Now())
 	demo.Assign("title", "welcome to foolgo~")
 	demo.Assign("id", demo.Param("id"))
+
 	demo.Display()
 }
 
